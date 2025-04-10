@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钉钉授权码获取示例</title>
+    <!-- 引入钉钉JSAPI -->
+    <script src='https://g.alicdn.com/code/npm/@ali/dingtalk-h5-remote-debug/0.1.3/index.js'></script>
+    <script src="https://g.alicdn.com/dingding/dingtalk-jsapi/3.0.25/dingtalk.open.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1890ff;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #40a9ff;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            background-color: #fafafa;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-style: italic;
+            color: #888;
+        }
+
+        .error {
+            color: #f5222d;
+        }
+
+        .success {
+            color: #52c41a;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>钉钉授权码获取示例</h1>
+
+        <div class="form-group">
+            <label for="corpId">企业ID (CorpId):</label>
+            <input type="text" id="corpId" placeholder="请输入您的企业CorpId">
+        </div>
+
+        <button id="getAuthButton">获取授权码</button>
+
+        <div class="status" id="status">请在钉钉客户端中打开此页面并输入CorpId</div>
+
+        <div id="result">// 授权码结果将显示在这里</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const corpIdInput = document.getElementById('corpId');
+            const getAuthButton = document.getElementById('getAuthButton');
+            const statusElement = document.getElementById('status');
+            const resultElement = document.getElementById('result');
+
+            // 检测是否在钉钉环境中
+            function isDingTalkClient() {
+                return /DingTalk/.test(navigator.userAgent);
+            }
+
+            // 更新状态显示
+            // if (!isDingTalkClient()) {
+            //     statusElement.textContent = '⚠️ 请在钉钉客户端中打开此页面';
+            //     statusElement.className = 'status error';
+            //     getAuthButton.disabled = true;
+            // } else {
+            //     statusElement.textContent = '✅ 已在钉钉客户端中打开，请输入企业CorpId并获取授权码';
+            //     statusElement.className = 'status success';
+            // }
+
+            // 获取授权码点击事件
+            getAuthButton.addEventListener('click', function () {
+                const corpId = corpIdInput.value.trim();
+
+                if (!corpId) {
+                    statusElement.textContent = '⚠️ 请输入企业CorpId';
+                    statusElement.className = 'status error';
+                    return;
+                }
+
+                statusElement.textContent = '正在获取授权码...';
+                statusElement.className = 'status';
+
+                // 调用钉钉JSAPI获取授权码
+                dd.getAuthCode({
+                    corpId: corpId,
+                    success: function (res) {
+                        const authCode = res.code;
+                        statusElement.textContent = '✅ 获取授权码成功';
+                        statusElement.className = 'status success';
+                        resultElement.textContent = `授权码: ${authCode}\n\n可在后端使用此授权码换取用户身份信息`;
+
+                        // 输出到控制台方便调试
+                        console.log("获取授权码成功:", authCode);
+                    },
+                    fail: function (err) {
+                        statusElement.textContent = '❌ 获取授权码失败';
+                        statusElement.className = 'status error';
+                        resultElement.textContent = `获取授权码失败\n错误信息: ${JSON.stringify(err)}`;
+
+                        console.error("获取授权码失败:", err);
+                    }
+                });
+            });
+
+            // 对于开发测试，可以填入默认值
+            // corpIdInput.value = "dinga3850a98bced5523f2c783f7214b6d69";
+        });
+    </script>
+</body>
+
+</html>
